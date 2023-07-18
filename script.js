@@ -1,88 +1,148 @@
 // import _ from "lodash"
 
-const dealerVal = document.getElementById('dealerVal')
-const yourVal = document.getElementById('yourVal')
+const dealerVal = document.getElementById("dealerVal");
+const yourVal = document.getElementById("yourVal");
 
-const yourCards = []
-const dealerCards = []
+const yourCards = [];
+const dealerCards = [];
 
+const numPlayer = 1;
 
+const funcBtns = document.querySelectorAll(".func");
 
-const funcBtns = document.querySelectorAll('.func')
+funcBtns.forEach((button) => {
+	button.addEventListener("click", () => {
+		if (button.id === "play") {
+			createDeck();
+		} else if (button.id === "deal") {
+			dealCards();
+			determineVal();
+		} else if (button.id === "hit") {
+			hitPlayer();
+			determineVal();
+		} else if (button.id === "clear") {
+			clearGame();
+		}
+	});
+});
 
-funcBtns.forEach(button => {
+// Game set-up-----------------------------
+const suits = ["D", "C", "H", "S"];
+const values = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "K", "Q", "A"];
+var singleDeck = [];
+var shuffledDeck = [];
 
-    button.addEventListener('click', () => {
-        if (button.id === "play") {
-            createDeck()
-        } else if (button.id === "deal") {
-            dealCards()
-            
-            // console.log(yourCards)
-            // console.log(dealerCards)
-        } else if (button.id === "contact") {
-            return
-        }
-    })
-
-})
-
-
-const suits = ['D', 'C', 'H', 'S']
-const values = [2,3,4,5,6,7,8,9,10,"J","K","Q","A"]
-let singleDeck = []
-let shuffledDeck = []
-
-
-
-function createDeck(){
-    for(let s=0;s<suits.length;s++){
-        for(let v=0;v<values.length;v++){
-            singleDeck.push(values[v]+suits[s])
-        }
-    }
-    dealerVal.textContent = "69"
-    yourVal.textContent = "420"
-    // shuffledDeck = _.shuffle(singleDeck)
+function createDeck() {
+	for (let s = 0; s < suits.length; s++) {
+		for (let v = 0; v < values.length; v++) {
+			singleDeck.push(values[v] + suits[s]);
+		}
+	}
+	dealerVal.textContent = "69";
+	yourVal.textContent = "420";
+	shuffle(singleDeck);
 }
 
-// determineVal(singleDeck[10])
+function shuffle(array) {
+	let currentIndex = array.length,
+		randomIndex;
 
-let yourValNum = []
+	while (currentIndex != 0) {
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
 
-function dealCards(){
-    yourCards.push(shuffledDeck.pop())
-    dealerCards.push(shuffledDeck.pop())
+		[array[currentIndex], array[randomIndex]] = [
+			array[randomIndex],
+			array[currentIndex],
+		];
+	}
 
-    determineVal(yourCards[0])
+	shuffledDeck = array;
 }
 
+//   Determine values-------------------------
+let yourValNum = [];
 
-function determineVal(card){
-
-    for(let i=0;i<yourCards.length;i++){
-        card[i].slice(0,-1)
-        console.log(card[i])
-        // yourValNum.push(card[i])
-    }
-
-    // yourValNum.push(Cardval.value)
-    console.log(yourCards)
-    console.log(yourValNum)
+function dealCards() {
+	if (numPlayer === 1) {
+		yourCards.push(shuffledDeck.pop());
+		dealerCards.push(shuffledDeck.pop());
+		yourCards.push(shuffledDeck.pop());
+		dealerCards.push(shuffledDeck.pop());
+	}
 }
 
+function hitPlayer() {
+	if (numPlayer === 1) {
+		yourCards.push(shuffledDeck.pop());
+	}
+}
 
+function determineVal() {
+	var val = 0;
+	let yourCardsVal = [];
 
+	for (let i = 0; i < yourCards.length; i++) {
+		
+		if (yourCards[i].slice(0, -1) === "A") {
+			yourCardsVal[i] = 1;
+		} else if (
+			yourCards[i].slice(0, -1) === "J" ||
+			yourCards[i].slice(0, -1) === "Q" ||
+			yourCards[i].slice(0, -1) === "K"
+		) {
+			yourCardsVal[i] = 10;
+		} else {
+			yourCardsVal[i] = parseInt(yourCards[i].slice(0, -1));
+		}
+	}
+	console.log(yourCards);
+
+	for (let i = 0; i < yourCards.length; i++) {
+		if (
+			yourCardsVal[i] === "J" ||
+			yourCardsVal[i] === "Q" ||
+			yourCardsVal[i] === "K"
+		) {
+			val += 10;
+		} else if (yourCardsVal[i] === "A") {
+			val += 11;
+		} else {
+			val += yourCardsVal[i];
+		}
+
+		yourVal.textContent = val;
+	}
+
+	console.log(val);
+    console.log(shuffledDeck.length)
+}
+
+let test = [];
+
+function clearGame() {
+	// test = [1,2,3,4,5]
+	test.push("1");
+
+	if (typeof test[0] === "string") {
+		console.log("its a string");
+	} else {
+		console.log("not a string");
+	}
+}
+
+// test.push(1,2,3,4,5)
+// console.log(test)
+// singleDeck = []
+// shuffledDeck = []
+// yourCards = []
+// yourVal = []
+// dealerCards = []
+// dealerVal = []
 
 // let deck = []
 
-// const createBlack8 = (arr, n) => 
+// const createBlack8 = (arr, n) =>
 // [].concat(...Array(n).fill(arr));
 
 // deck = createBlack8(singleDeck,8)
-
-
-
-
-
-

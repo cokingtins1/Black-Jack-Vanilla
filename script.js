@@ -2,9 +2,16 @@
 
 const dealerVal = document.getElementById("dealerVal");
 const yourVal = document.getElementById("yourVal");
+const yourImg = document.getElementById("yourimg");
+const orVal = document.getElementById("orVal");
 
-const yourCards = [];
-const dealerCards = [];
+let yourCards = [];
+let dealerCards = [];
+
+let suits = [];
+let values = [];
+let singleDeck = [];
+let shuffledDeck = [];
 
 const numPlayer = 1;
 
@@ -13,13 +20,17 @@ const funcBtns = document.querySelectorAll(".func");
 funcBtns.forEach((button) => {
 	button.addEventListener("click", () => {
 		if (button.id === "play") {
+			gameSetUp();
 			createDeck();
 		} else if (button.id === "deal") {
 			dealCards();
-			determineVal();
+			// var test = ["3C", "AS", "5H", "AH"];
+			determineVal(yourCards);
+			updateDisplay(yourCards);
 		} else if (button.id === "hit") {
 			hitPlayer();
-			determineVal();
+			determineVal(yourCards);
+			updateDisplay(yourCards);
 		} else if (button.id === "clear") {
 			clearGame();
 		}
@@ -27,10 +38,13 @@ funcBtns.forEach((button) => {
 });
 
 // Game set-up-----------------------------
-const suits = ["D", "C", "H", "S"];
-const values = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "K", "Q", "A"];
-var singleDeck = [];
-var shuffledDeck = [];
+
+function gameSetUp() {
+	suits = ["D", "C", "H", "S"];
+	values = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "K", "Q", "A"];
+	singleDeck = [];
+	shuffledDeck = [];
+}
 
 function createDeck() {
 	for (let s = 0; s < suits.length; s++) {
@@ -38,8 +52,7 @@ function createDeck() {
 			singleDeck.push(values[v] + suits[s]);
 		}
 	}
-	dealerVal.textContent = "69";
-	yourVal.textContent = "420";
+
 	shuffle(singleDeck);
 }
 
@@ -61,7 +74,6 @@ function shuffle(array) {
 }
 
 //   Determine values-------------------------
-let yourValNum = [];
 
 function dealCards() {
 	if (numPlayer === 1) {
@@ -70,76 +82,104 @@ function dealCards() {
 		yourCards.push(shuffledDeck.pop());
 		dealerCards.push(shuffledDeck.pop());
 	}
+	return yourCards;
 }
 
 function hitPlayer() {
 	if (numPlayer === 1) {
 		yourCards.push(shuffledDeck.pop());
 	}
+	return yourCards;
 }
 
-function determineVal() {
-	var val = 0;
-	let yourCardsVal = [];
+function determineVal(hand) {
+	let val = 0;
+	let orValNum = 0;
+	let handVal = [];
+	let numAce = [];
 
-	for (let i = 0; i < yourCards.length; i++) {
-		
-		if (yourCards[i].slice(0, -1) === "A") {
-			yourCardsVal[i] = 1;
+	for (let i = 0; i < hand.length; i++) {
+		if (hand[i].slice(0, -1) === "A") {
+			handVal[i] = 1; // default val of ace
+			numAce += 1;
 		} else if (
-			yourCards[i].slice(0, -1) === "J" ||
-			yourCards[i].slice(0, -1) === "Q" ||
-			yourCards[i].slice(0, -1) === "K"
+			hand[i].slice(0, -1) === "J" ||
+			hand[i].slice(0, -1) === "Q" ||
+			hand[i].slice(0, -1) === "K"
 		) {
-			yourCardsVal[i] = 10;
+			handVal[i] = 10;
 		} else {
-			yourCardsVal[i] = parseInt(yourCards[i].slice(0, -1));
+			handVal[i] = parseInt(hand[i].slice(0, -1));
 		}
 	}
-	console.log(yourCards);
 
-	for (let i = 0; i < yourCards.length; i++) {
-		if (
-			yourCardsVal[i] === "J" ||
-			yourCardsVal[i] === "Q" ||
-			yourCardsVal[i] === "K"
-		) {
-			val += 10;
-		} else if (yourCardsVal[i] === "A") {
-			val += 11;
-		} else {
-			val += yourCardsVal[i];
+	// Handle multiple Aces (change first occurance of ace to 11)
+	if (numAce > 1) {
+		const index = handVal.indexOf(1);
+		if (index !== -1) {
+			handVal[index] = 11;
 		}
-
-		yourVal.textContent = val;
 	}
 
-	console.log(val);
-    console.log(shuffledDeck.length)
+	// Determine hand value
+	for (let i = 0; i < handVal.length; i++) {
+		val += handVal[i];
+	}
+
+	// Determine hand value if hand incldues ace
+	if (handVal.includes(1)) {
+		for (let i = 0; i < handVal.length; i++) {
+			if (handVal[i] === 1) {
+				orValNum += 11;
+			} else orValNum += handVal[i];
+		}
+	}
+
+	// Print hand value
+	yourVal.textContent = val;
+	if (orValNum > 21) {
+		orVal.textContent = "bust";
+	} else {
+		orVal.textContent = orValNum;
+	}
+
+	console.log(handVal);
+	console.log(numAce);
 }
 
-let test = [];
+// DOM manipulation
+var htmlElements = "";
+var imgMap = [];
+
+function updateDisplay(hand) {
+	const imgContainer = document.createElement("div");
+	imgContainer.classList.add("imgCont");
+
+	if (htmlElements === "") {
+		for (let i = 0; i < hand.length; i++) {
+			imgMap[i] = "./cards/" + hand[i] + ".svg";
+		}
+
+		for (let i = 0; i < hand.length; i++) {
+			htmlElements += `<img class = "card" src=${imgMap[i]} alt="" />`;
+		}
+		console.log(htmlElements);
+		imgContainer.innerHTML = htmlElements;
+		yourImg.append(imgContainer);
+	} else if(htmlElements !== ""){
+        return
+    }
+}
+
+function checkWin() {}
 
 function clearGame() {
-	// test = [1,2,3,4,5]
-	test.push("1");
-
-	if (typeof test[0] === "string") {
-		console.log("its a string");
-	} else {
-		console.log("not a string");
-	}
+	dealerCards = [];
+	yourCards = [];
+	orValNum = [];
+	dealerVal.textContent = "";
+	yourVal.textContent = "";
 }
-
-// test.push(1,2,3,4,5)
-// console.log(test)
-// singleDeck = []
-// shuffledDeck = []
-// yourCards = []
-// yourVal = []
-// dealerCards = []
-// dealerVal = []
-
 // let deck = []
 
 // const createBlack8 = (arr, n) =>
